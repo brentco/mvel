@@ -19,6 +19,7 @@ import org.mvel2.compiler.CompiledExpression;
 import org.mvel2.compiler.ExecutableStatement;
 import org.mvel2.compiler.ExpressionCompiler;
 import org.mvel2.integration.Interceptor;
+import org.mvel2.integration.SecurityContext;
 import org.mvel2.integration.VariableResolverFactory;
 import org.mvel2.integration.impl.*;
 import org.mvel2.optimizers.impl.refl.nodes.GetterAccessor;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -670,8 +672,18 @@ public class MVEL {
     compiler.compile();
   }
 
+  public static void analysisCompile(char[] expression, ParserContext ctx, SecurityContext securityContext) {
+    ExpressionCompiler compiler = new ExpressionCompiler(expression, ctx, securityContext);
+    compiler.setVerifyOnly(true);
+    compiler.compile();
+  }
+
   public static void analysisCompile(String expression, ParserContext ctx) {
     analysisCompile(expression.toCharArray(), ctx);
+  }
+
+  public static void analysisCompile(String expression, ParserContext ctx, SecurityContext securityContext) {
+    analysisCompile(expression.toCharArray(), ctx, securityContext);
   }
 
   public static Class analyze(char[] expression, ParserContext ctx) {
@@ -681,8 +693,19 @@ public class MVEL {
     return compiler.getReturnType();
   }
 
+  public static Class analyze(char[] expression, ParserContext ctx, SecurityContext securityContext) {
+    ExpressionCompiler compiler = new ExpressionCompiler(expression, ctx, securityContext);
+    compiler.setVerifyOnly(true);
+    compiler.compile();
+    return compiler.getReturnType();
+  }
+
   public static Class analyze(String expression, ParserContext ctx) {
     return analyze(expression.toCharArray(), ctx);
+  }
+
+  public static Class analyze(String expression, ParserContext ctx, SecurityContext securityContext) {
+    return analyze(expression.toCharArray(), ctx, securityContext);
   }
 
   /**
@@ -810,8 +833,17 @@ public class MVEL {
     return optimizeTree(new ExpressionCompiler(expression, ctx).compile());
   }
 
+  public static Serializable compileExpression(String expression, ParserContext ctx, SecurityContext securityContext) {
+    return optimizeTree(new ExpressionCompiler(expression, ctx, securityContext).compile());
+  }
+
   public static Serializable compileExpression(char[] expression, int start, int offset, ParserContext ctx) {
     ExpressionCompiler c = new ExpressionCompiler(expression, start, offset, ctx);
+    return optimizeTree(c._compile());
+  }
+
+  public static Serializable compileExpression(char[] expression, int start, int offset, ParserContext ctx, SecurityContext securityContext) {
+    ExpressionCompiler c = new ExpressionCompiler(expression, start, offset, ctx, securityContext);
     return optimizeTree(c._compile());
   }
 
@@ -821,6 +853,10 @@ public class MVEL {
 
   public static Serializable compileExpression(char[] expression, ParserContext ctx) {
     return optimizeTree(new ExpressionCompiler(expression, ctx).compile());
+  }
+
+  public static Serializable compileExpression(char[] expression, ParserContext ctx, SecurityContext securityContext) {
+    return optimizeTree(new ExpressionCompiler(expression, ctx, securityContext).compile());
   }
 
   /**
@@ -857,12 +893,20 @@ public class MVEL {
     return new CompiledAccExpression(expression.toCharArray(), Object.class, ctx);
   }
 
+  public static Serializable compileGetExpression(String expression, ParserContext ctx, SecurityContext securityContext) {
+    return new CompiledAccExpression(expression.toCharArray(), Object.class, ctx, securityContext);
+  }
+
   public static Serializable compileGetExpression(char[] expression) {
     return new CompiledAccExpression(expression, Object.class, new ParserContext());
   }
 
   public static Serializable compileGetExpression(char[] expression, ParserContext ctx) {
     return new CompiledAccExpression(expression, Object.class, ctx);
+  }
+
+  public static Serializable compileGetExpression(char[] expression, ParserContext ctx, SecurityContext securityContext) {
+    return new CompiledAccExpression(expression, Object.class, ctx, securityContext);
   }
 
   public static Serializable compileSetExpression(String expression) {
@@ -877,6 +921,10 @@ public class MVEL {
     return new CompiledAccExpression(expression.toCharArray(), ingressType, ctx);
   }
 
+  public static Serializable compileSetExpression(String expression, Class ingressType, ParserContext ctx, SecurityContext securityContext) {
+    return new CompiledAccExpression(expression.toCharArray(), ingressType, ctx, securityContext);
+  }
+
   public static Serializable compileSetExpression(char[] expression) {
     return new CompiledAccExpression(expression, Object.class, new ParserContext());
   }
@@ -885,12 +933,24 @@ public class MVEL {
     return new CompiledAccExpression(expression, Object.class, ctx);
   }
 
+  public static Serializable compileSetExpression(char[] expression, ParserContext ctx, SecurityContext securityContext) {
+    return new CompiledAccExpression(expression, Object.class, ctx, securityContext);
+  }
+
   public static Serializable compileSetExpression(char[] expression, int start, int offset, ParserContext ctx) {
     return new CompiledAccExpression(expression, start, offset, Object.class, ctx);
   }
 
+  public static Serializable compileSetExpression(char[] expression, int start, int offset, ParserContext ctx, SecurityContext securityContext) {
+    return new CompiledAccExpression(expression, start, offset, Object.class, ctx, securityContext);
+  }
+
   public static Serializable compileSetExpression(char[] expression, Class ingressType, ParserContext ctx) {
     return new CompiledAccExpression(expression, ingressType, ctx);
+  }
+
+  public static Serializable compileSetExpression(char[] expression, Class ingressType, ParserContext ctx, SecurityContext securityContext) {
+    return new CompiledAccExpression(expression, ingressType, ctx, securityContext);
   }
 
   public static void executeSetExpression(Serializable compiledSet, Object ctx, Object value) {

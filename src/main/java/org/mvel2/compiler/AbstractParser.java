@@ -82,7 +82,9 @@ import org.mvel2.ast.Union;
 import org.mvel2.ast.UntilNode;
 import org.mvel2.ast.WhileNode;
 import org.mvel2.ast.WithNode;
+import org.mvel2.integration.SecurityContext;
 import org.mvel2.integration.VariableResolverFactory;
+import org.mvel2.integration.impl.DefaultSecurityContext;
 import org.mvel2.util.ErrorUtil;
 import org.mvel2.util.ExecutionStack;
 import org.mvel2.util.FunctionParser;
@@ -142,6 +144,8 @@ public class AbstractParser implements Parser, Serializable {
   protected ExecutionStack splitAccumulator = new ExecutionStack();
 
   protected ParserContext pCtx;
+  protected SecurityContext sCtx;
+
   protected ExecutionStack dStack;
   protected Object ctx;
   protected VariableResolverFactory variableFactory;
@@ -152,12 +156,26 @@ public class AbstractParser implements Parser, Serializable {
     setupParser();
   }
 
+  public SecurityContext getSecurityContext() {
+    return sCtx;
+  }
+
+  public void setSecurityContext(SecurityContext ctx) {
+    sCtx = ctx != null ? ctx : new DefaultSecurityContext();
+  }
+
   protected AbstractParser() {
     pCtx = new ParserContext();
+    sCtx = new DefaultSecurityContext();
   }
 
   protected AbstractParser(ParserContext pCtx) {
     this.pCtx = pCtx != null ? pCtx : new ParserContext();
+  }
+
+  protected AbstractParser(ParserContext pCtx, SecurityContext sCtx) {
+    this.pCtx = pCtx != null ? pCtx : new ParserContext();
+    this.sCtx = sCtx != null ? sCtx : new DefaultSecurityContext();
   }
 
   /**
