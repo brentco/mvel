@@ -1,27 +1,30 @@
 package org.mvel2.integration.impl;
 
+import org.mvel2.PropertyAccessor;
 import org.mvel2.integration.SecurityContext;
-import org.mvel2.optimizers.impl.refl.nodes.VariableAccessor;
 
-import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A security context that allows everything. This is the security context that replicates the language behavior before
  * sandboxing was introduced.
  */
 public class DefaultSecurityContext implements SecurityContext {
-    @Override
-    public boolean canAccessVariable(VariableAccessor accessor) {
-        return true;
+
+    private final Map<String, Object> literals = new HashMap<String, Object>();
+
+    public DefaultSecurityContext() {
+
     }
 
     @Override
-    public boolean canAccessMethod(Method method) {
-        return true;
+    public void checkPropertyAccess(PropertyAccessor accessor) {
+        System.out.println("Checking property access '" + accessor);
     }
 
     @Override
-    public boolean canCreateClass(Class<?> c) {
-        return true;
+    public Map<String, Object> getLiterals() {
+        return new HashMap<String, Object>();
     }
 }

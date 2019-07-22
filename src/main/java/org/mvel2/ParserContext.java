@@ -42,6 +42,8 @@ import org.mvel2.compiler.AbstractParser;
 import org.mvel2.compiler.CompiledExpression;
 import org.mvel2.compiler.Parser;
 import org.mvel2.integration.Interceptor;
+import org.mvel2.integration.SecurityContext;
+import org.mvel2.integration.impl.DefaultSecurityContext;
 import org.mvel2.util.LineMapper;
 import org.mvel2.util.MethodStub;
 import org.mvel2.util.ReflectionUtil;
@@ -103,13 +105,26 @@ public class ParserContext implements Serializable {
   private boolean executableCodeReached = false;
   private boolean indexAllocation = false;
   protected boolean variablesEscape = false;
+  
+  protected SecurityContext securityContext;
 
   public ParserContext() {
     parserConfiguration = new ParserConfiguration();
+    setSecurityContext(null);
+  }
+
+  public ParserContext(SecurityContext securityContext) {
+    this();
+    setSecurityContext(securityContext);
   }
 
   public ParserContext(boolean debugSymbols) {
     this();
+    this.debugSymbols = debugSymbols;
+  }
+
+  public ParserContext(boolean debugSymbols, SecurityContext securityContext) {
+    this(securityContext);
     this.debugSymbols = debugSymbols;
   }
 
@@ -118,12 +133,27 @@ public class ParserContext implements Serializable {
     this.rootParser = rootParser;
   }
 
+  public ParserContext(Parser rootParser, SecurityContext securityContext) {
+    this(securityContext);
+    this.rootParser = rootParser;
+  }
+
   public ParserContext(ParserConfiguration parserConfiguration) {
     this.parserConfiguration = parserConfiguration;
   }
 
+  public ParserContext(ParserConfiguration parserConfiguration, SecurityContext securityContext) {
+    this.parserConfiguration = parserConfiguration;
+    setSecurityContext(securityContext);
+  }
+
   public ParserContext(ParserConfiguration parserConfiguration, Object evaluationContext) {
     this(parserConfiguration);
+    this.evaluationContext = evaluationContext;
+  }
+
+  public ParserContext(ParserConfiguration parserConfiguration, Object evaluationContext, SecurityContext securityContext) {
+    this(parserConfiguration, securityContext);
     this.evaluationContext = evaluationContext;
   }
 
@@ -133,9 +163,29 @@ public class ParserContext implements Serializable {
     this.functionContext = functionContext;
   }
 
+  public ParserContext(ParserConfiguration parserConfiguration, ParserContext parent, boolean functionContext, SecurityContext securityContext) {
+    this(parserConfiguration, securityContext);
+    this.parent = parent;
+    this.functionContext = functionContext;
+  }
+
   public ParserContext(Map<String, Object> imports, Map<String, Interceptor> interceptors, String sourceFile) {
     this.sourceFile = sourceFile;
     this.parserConfiguration = new ParserConfiguration(imports, interceptors);
+  }
+
+  public ParserContext(Map<String, Object> imports, Map<String, Interceptor> interceptors, String sourceFile, SecurityContext securityContext) {
+    this.sourceFile = sourceFile;
+    this.parserConfiguration = new ParserConfiguration(imports, interceptors);
+    setSecurityContext(securityContext);
+  }
+
+  public SecurityContext getSecurityContext() {
+    return securityContext;
+  }
+
+  public void setSecurityContext(SecurityContext securityContext) {
+    this.securityContext = securityContext != null ? securityContext : new DefaultSecurityContext();
   }
 
   public ParserContext createSubcontext() {

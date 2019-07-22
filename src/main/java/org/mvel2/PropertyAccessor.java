@@ -140,6 +140,8 @@ public class PropertyAccessor {
   private Object get() {
     curr = ctx;
 
+    pCtx.getSecurityContext().checkPropertyAccess(this);
+
     try {
       if (!MVEL.COMPILER_OPT_ALLOW_OVERRIDE_ALL_PROPHANDLING) {
         return getNormal();
